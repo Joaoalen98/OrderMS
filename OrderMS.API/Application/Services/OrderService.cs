@@ -15,14 +15,19 @@ public class OrderService(IMongoDatabase mongoDatabase) : IOrderService
         return orderDTO;
     }
 
-    public async Task<PaginationDTO<OrderDTO>> GetAll(int page = 1, int quantity = 10)
+    public async Task<PaginationDTO<OrderDTO>> GetAllByCustomerId(long clientId, int page = 1, int quantity = 10)
     {
-        var orders = await _ordersCollection
-            .Find(_ => true)
+        var all = _ordersCollection
+            .Find(o => o.ClientId == clientId);
+
+        var totalResults = await all.CountDocumentsAsync();
+        var totalPages = (long)Math.Ceiling(totalResults / (decimal)quantity);
+
+        var orders = await all
             .Skip((page - 1) * quantity)
             .Limit(quantity)
             .ToListAsync();
 
-        return new PaginationDTO<OrderDTO>(page, orders.Select(OrderDTO.FromEntity));
+        return new PaginationDTO<OrderDTO>(page, totalResults, totalPages, orders.Select(OrderDTO.FromEntity));
     }
 }
