@@ -15,9 +15,14 @@ public class OrderService(IMongoDatabase mongoDatabase) : IOrderService
         return orderDTO;
     }
 
-    public async Task<IEnumerable<OrderDTO>> GetAll()
+    public async Task<PaginationDTO<OrderDTO>> GetAll(int page = 1, int quantity = 10)
     {
-        return (await _ordersCollection.Find(_ => true).ToListAsync())
-            .Select(OrderDTO.FromEntity);
+        var orders = await _ordersCollection
+            .Find(_ => true)
+            .Skip((page - 1) * quantity)
+            .Limit(quantity)
+            .ToListAsync();
+
+        return new PaginationDTO<OrderDTO>(page, orders.Select(OrderDTO.FromEntity));
     }
 }
