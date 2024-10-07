@@ -25,9 +25,9 @@ builder.Services.AddHostedService<RabbitMQService>();
 
 var app = builder.Build();
 
-app.MapGet("/customers/{clientId}/orders", async (IOrderService orderService, long clientId, [FromQuery] int page = 1, [FromQuery] int quantity = 10) =>
+app.MapGet("/customers/{customerId}/orders", async (IOrderService orderService, long customerId, [FromQuery] int page = 1, [FromQuery] int quantity = 10) =>
 {
-    return Results.Ok(await orderService.GetAllByCustomerId(clientId, page, quantity));
+    return Results.Ok(await orderService.GetAllByCustomerId(customerId, page, quantity));
 });
 
 if (app.Environment.IsDevelopment())

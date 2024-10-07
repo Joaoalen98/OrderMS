@@ -11,7 +11,7 @@ public class Order
     public string Id { get; set; } = default!;
 
     public required long Code { get; set; }
-    public required long ClientId { get; set; }
+    public required long CustomerId { get; set; }
     public required IEnumerable<OrderItem> Items { get; set; } = default!;
     public double Total { get => Items.Sum(x => x.Price * x.Quantity); }
 
@@ -19,7 +19,7 @@ public class Order
     {
         return new Order
         {
-            ClientId = orderDTO.ClientId,
+            CustomerId = orderDTO.CustomerId,
             Code = orderDTO.Code,
             Items = orderDTO.Items.Select(OrderItem.FromDTO)
         };

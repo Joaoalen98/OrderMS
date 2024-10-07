@@ -15,10 +15,10 @@ public class OrderService(IMongoDatabase mongoDatabase) : IOrderService
         return orderDTO;
     }
 
-    public async Task<PaginationDTO<OrderDTO>> GetAllByCustomerId(long clientId, int page = 1, int quantity = 10)
+    public async Task<PaginationDTO<OrderDTO>> GetAllByCustomerId(long customerId, int page = 1, int quantity = 10)
     {
         var all = _ordersCollection
-            .Find(o => o.ClientId == clientId);
+            .Find(o => o.CustomerId == customerId);
 
         var totalResults = await all.CountDocumentsAsync();
         var totalPages = (long)Math.Ceiling(totalResults / (decimal)quantity);
