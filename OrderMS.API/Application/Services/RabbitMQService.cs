@@ -72,8 +72,7 @@ public class RabbitMQService : BackgroundService
 
     public override void Dispose()
     {
-        _channel?.Close();
-        _connection?.Close();
+        GC.SuppressFinalize(this);
         base.Dispose();
     }
 }
