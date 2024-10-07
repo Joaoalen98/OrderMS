@@ -1,7 +1,9 @@
 using System.Text;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using OrderMS.API.Application.DTOs;
 using OrderMS.API.Application.Interfaces;
+using OrderMS.API.Settings;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -13,20 +15,28 @@ public class RabbitMQService : BackgroundService
     private readonly IOrderService _orderService;
     private readonly IConnection _connection;
     private readonly IModel _channel;
-    private readonly string _queue = "order-created";
+    private readonly IOptions<RabbitMQSettings> _rabbitMQSettings;
 
-    public RabbitMQService(ILogger<RabbitMQService> logger, IServiceScopeFactory serviceScopeFactory)
+    public RabbitMQService(ILogger<RabbitMQService> logger, IServiceScopeFactory serviceScopeFactory, IOptions<RabbitMQSettings> rabbitMQSettings)
     {
         using var scope = serviceScopeFactory.CreateScope();
+        _rabbitMQSettings = rabbitMQSettings;
         _logger = logger;
         _orderService = scope.ServiceProvider.GetRequiredService<IOrderService>();
 
-        var factory = new ConnectionFactory { HostName = "localhost" };
+        var factory = new ConnectionFactory
+        {
+            HostName = rabbitMQSettings.Value.HostName,
+            Port = rabbitMQSettings.Value.Port,
+            UserName = rabbitMQSettings.Value.User,
+            Password = rabbitMQSettings.Value.Password
+        };
+
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
 
         _channel.QueueDeclare(
-            queue: _queue,
+            queue: rabbitMQSettings.Value.OrderCreatedQueueName,
             durable: false,
             exclusive: false,
             autoDelete: false,
@@ -40,7 +50,7 @@ public class RabbitMQService : BackgroundService
         var consumer = new EventingBasicConsumer(_channel);
         consumer.Received += OnReceived;
 
-        _channel.BasicConsume(queue: _queue, autoAck: true, consumer: consumer);
+        _channel.BasicConsume(queue: _rabbitMQSettings.Value.OrderCreatedQueueName, autoAck: true, consumer: consumer);
 
         return Task.CompletedTask;
     }

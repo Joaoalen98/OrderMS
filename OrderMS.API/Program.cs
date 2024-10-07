@@ -8,9 +8,10 @@ using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
-builder.Services.AddScoped<IOrderService, OrderService>();
-
 builder.Services.Configure<MongoDBSettings>(builder.Configuration.GetSection("MongoDBSettings"));
+builder.Services.Configure<RabbitMQSettings>(builder.Configuration.GetSection("RabbitMQSettings"));
+
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 builder.Services.AddScoped(x =>
 {
