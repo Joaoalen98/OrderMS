@@ -13,7 +13,6 @@ public class Order
     public required long Code { get; set; }
     public required long CustomerId { get; set; }
     public required IEnumerable<OrderItem> Items { get; set; } = default!;
-    public double Total { get => Items.Sum(x => x.Price * x.Quantity); }
 
     public static Order FromDTO(OrderDTO orderDTO)
     {
